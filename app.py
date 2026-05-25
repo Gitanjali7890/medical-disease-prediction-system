@@ -303,6 +303,46 @@ def predict():
         return jsonify({'error': str(e)}), 500   
 # Add this route after your existing routes
 
+# Add this import at the top
+from nlp_processor import nlp_processor
+
+# Add this route after your existing routes
+@app.route('/api/nlp_process', methods=['POST'])
+def nlp_process():
+    """Process natural language symptom input"""
+    try:
+        data = request.get_json()
+        user_text = data.get('text', '')
+        
+        if not user_text.strip():
+            return jsonify({
+                'success': False,
+                'error': 'Please enter your symptoms'
+            }), 400
+        
+        # Process the text
+        result = nlp_processor.process_message(user_text)
+        
+        # Convert detected symptoms to form data format
+        form_data = {}
+        for symptom in result['detected_symptoms']:
+            form_data[symptom] = 1
+        
+        return jsonify({
+            'success': True,
+            'detected_symptoms': result['detected_symptoms'],
+            'unknown_symptoms': result['unknown_symptoms'],
+            'warnings': result['warnings'],
+            'suggestions': result['suggestions'],
+            'has_known': result['has_known'],
+            'has_unknown': result['has_unknown'],
+            'form_data': form_data
+        })
+    
+    except Exception as e:
+        print(f"NLP Error: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+    
 @app.route('/api/chat', methods=['POST'])
 def chat():
     """Chatbot API endpoint - maintains conversation"""
