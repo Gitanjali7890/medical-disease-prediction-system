@@ -200,93 +200,107 @@ def home():
 def predict():
     """API endpoint for disease prediction"""
     try:
-        # Get data from request
         data = request.get_json()
+        print("Received data:", data)  # Debug print
         
-        # Extract patient data
+        # Extract patient data - MATCH EXACTLY with feature_columns
         patient_data = {
             'Fever': int(data.get('Fever', 0)),
             'Cough': int(data.get('Cough', 0)),
             'Fatigue': int(data.get('Fatigue', 0)),
-            'Difficulty Breathing': int(data.get('Difficulty_Breathing', 0)),
+            'Difficulty_Breathing': int(data.get('Difficulty_Breathing', 0)),
+            'Headache': int(data.get('Headache', 0)),
+            'SoreThroat': int(data.get('SoreThroat', 0)),
+            'BodyAche': int(data.get('BodyAche', 0)),
+            'RunnyNose': int(data.get('RunnyNose', 0)),
             'Age': int(data.get('Age', 30)),
             'Gender': int(data.get('Gender', 0)),
-            'Blood Pressure': int(data.get('Blood_Pressure', 1)),
-            'Cholesterol Level': int(data.get('Cholesterol_Level', 1)),
-            'Disease_Encoded': 0
+            'Blood_Pressure': int(data.get('Blood_Pressure', 1)),
+            'Cholesterol_Level': int(data.get('Cholesterol_Level', 1))
         }
         
-        # Create feature vector
+        print("Patient data dict:", patient_data)  # Debug print
+        
+        # Create feature vector in correct order
+        feature_columns = joblib.load('models/feature_columns.pkl')
+        print("Feature columns from model:", feature_columns)  # Debug print
+        
         features = np.array([[patient_data[col] for col in feature_columns]])
+        print("Features array:", features)  # Debug print
         
         # Make prediction
-        prediction = model.predict(features)[0]
+        prediction_encoded = model.predict(features)[0]
         probabilities = model.predict_proba(features)[0]
+        
+        # Get actual disease name
+        predicted_disease = disease_encoder.inverse_transform([prediction_encoded])[0]
         
         # Get confidence
         confidence = round(max(probabilities) * 100, 2)
-        result = "Positive" if prediction == 1 else "Negative"
         
-        # Get enhanced severity analysis
-        severity, severity_icon, risk_factors, action_required = get_severity_enhanced(patient_data, confidence, result)
+        # Get top 3 predictions
+        top_3_indices = np.argsort(probabilities)[-3:][::-1]
+        top_3_diseases = []
+        for idx in top_3_indices:
+            top_3_diseases.append({
+                'disease': disease_encoder.inverse_transform([idx])[0],
+                'probability': round(probabilities[idx] * 100, 2)
+            })
         
-        # Get specialist recommendations
-        specialists = specialist_mapping[result][severity]
+        # Count symptoms (all 8)
+        symptoms_count = sum([
+            patient_data['Fever'], patient_data['Cough'], patient_data['Fatigue'],
+            patient_data['Difficulty_Breathing'], patient_data['Headache'],
+            patient_data['SoreThroat'], patient_data['BodyAche'], patient_data['RunnyNose']
+        ])
         
-        # Get symptom-specific advice
-        symptom_advice = []
-        symptoms_list = []
-        if patient_data['Fever']:
-            symptom_advice.extend(medical_advice_detailed['Fever'])
-            symptoms_list.append('Fever')
-        if patient_data['Cough']:
-            symptom_advice.extend(medical_advice_detailed['Cough'])
-            symptoms_list.append('Cough')
-        if patient_data['Fatigue']:
-            symptom_advice.extend(medical_advice_detailed['Fatigue'])
-            symptoms_list.append('Fatigue')
-        if patient_data['Difficulty Breathing']:
-            symptom_advice.extend(medical_advice_detailed['Difficulty Breathing'])
-            symptoms_list.append('Difficulty Breathing')
-        
-        # Remove duplicates from symptom advice
-        symptom_advice = list(dict.fromkeys(symptom_advice))
-        
-        # Get lifestyle recommendations based on age and risk
-        age = patient_data['Age']
-        if age > 50 or severity == "Severe":
-            lifestyle_recs = lifestyle_advice['diet'] + lifestyle_advice['exercise']
+        # Determine severity
+        if symptoms_count >= 5 or predicted_disease in ['COVID-19', 'Influenza']:
+            severity = "Moderate"
+            severity_icon = "🟠"
+            action = "⚠️ MEDICAL ATTENTION RECOMMENDED: Schedule a doctor's appointment within 2-3 days"
+        elif symptoms_count >= 3:
+            severity = "Mild"
+            severity_icon = "🟢"
+            action = "✅ LOW RISK: Monitor symptoms and maintain healthy lifestyle"
         else:
-            lifestyle_recs = lifestyle_advice['diet'][:2] + lifestyle_advice['exercise'][:2] + lifestyle_advice['prevention'][:2]
+            severity = "Minimal"
+            severity_icon = "🔵"
+            action = "✅ Very low risk. Maintain healthy habits."
         
-        # Prepare response
+        # Specialist mapping
+        specialist_map = {
+            'Influenza': ['👨‍⚕️ General Physician', '🫁 Pulmonologist', '💊 Pharmacist'],
+            'COVID-19': ['🫁 Pulmonologist', '🩺 Infectious Disease Specialist', '👨‍⚕️ General Physician'],
+            'Common Cold': ['👨‍⚕️ General Practitioner', '💊 Pharmacist', '📞 Telehealth'],
+            'Allergy': ['🩺 Allergist', '👨‍⚕️ General Physician', '🥗 Nutritionist'],
+            'Bronchitis': ['🫁 Pulmonologist', '👨‍⚕️ General Physician', '💊 Respiratory Therapist']
+        }
+        specialists = specialist_map.get(predicted_disease, ['👨‍⚕️ General Physician', '📞 Telehealth consultation'])
+        
         response = {
-            'prediction': result,
+            'predicted_disease': predicted_disease,
             'confidence': confidence,
-            'probability_negative': round(probabilities[0] * 100, 2),
-            'probability_positive': round(probabilities[1] * 100, 2),
+            'top_3_predictions': top_3_diseases,
             'severity': severity,
             'severity_icon': severity_icon,
-            'risk_factors': risk_factors,
-            'action_required': action_required,
+            'action_required': action,
             'specialists': specialists,
-            'symptom_advice': symptom_advice[:5],  # Top 5 advice items
-            'lifestyle_advice': lifestyle_recs[:5],  # Top 5 lifestyle tips
-            'symptoms_count': len(symptoms_list),
-            'symptoms_list': symptoms_list,
+            'symptoms_count': symptoms_count,
             'age': patient_data['Age'],
             'gender': 'Male' if patient_data['Gender'] == 1 else 'Female',
-            'bp_status': ['Low', 'Normal', 'High'][patient_data['Blood Pressure']],
-            'cholesterol_status': ['Low', 'Normal', 'High'][patient_data['Cholesterol Level']],
-            'disclaimer': "⚠️ DISCLAIMER: This is an AI prediction system based on statistical analysis. This is not a substitute for professional medical advice, diagnosis, or treatment. Always seek the advice of your physician or other qualified health provider with any questions you may have regarding a medical condition."
+            'bp_status': ['Low', 'Normal', 'High'][patient_data['Blood_Pressure']],
+            'cholesterol_status': ['Low', 'Normal', 'High'][patient_data['Cholesterol_Level']],
+            'disclaimer': "⚠️ DISCLAIMER: This is an AI prediction system based on statistical analysis. This is not a substitute for professional medical advice."
         }
         
         return jsonify(response)
     
     except Exception as e:
         print(f"Error: {e}")
-        return jsonify({'error': str(e)}), 500
-
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500   
 # Add this route after your existing routes
 
 @app.route('/api/chat', methods=['POST'])

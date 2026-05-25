@@ -1,4 +1,0 @@
-Model: Random Forest Classifier
-Accuracy: 0.7857
-AUC Score: 0.8296
-Features: Fever, Cough, Fatigue, Difficulty Breathing, Age, Gender, Blood Pressure, Cholesterol Level, Disease_Encoded

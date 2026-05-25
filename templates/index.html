@@ -64,35 +64,6 @@
             color: #333;
         }
 
-        .symptom-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 12px;
-            margin-top: 10px;
-        }
-
-        .symptom-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px;
-            background: #f8f9fa;
-            border-radius: 8px;
-        }
-
-        .symptom-item input {
-            cursor: pointer;
-            width: 18px;
-            height: 18px;
-        }
-
-        .symptom-item label {
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: normal;
-            margin: 0;
-        }
-
         select, input[type="number"] {
             width: 100%;
             padding: 10px;
@@ -151,26 +122,6 @@
             margin-bottom: 20px;
         }
 
-        .prediction-positive {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-        }
-
-        .prediction-negative {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: white;
-        }
-
-        .prediction-text {
-            font-size: 2em;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-
-        .confidence {
-            font-size: 1.2em;
-        }
-
         .severity {
             display: inline-block;
             padding: 8px 20px;
@@ -179,54 +130,14 @@
             margin: 15px 0;
         }
 
-        .probability-bars {
-            margin: 20px 0;
-        }
-
-        .probability-bar {
-            margin: 10px 0;
-        }
-
-        .bar-label {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 5px;
-        }
-
-        .bar {
-            height: 35px;
-            border-radius: 5px;
-            display: flex;
-            align-items: center;
-            padding: 0 10px;
-            color: white;
-            font-size: 12px;
-            transition: width 0.5s ease;
-        }
-
-        .bar-negative {
-            background: linear-gradient(90deg, #4facfe, #00f2fe);
-        }
-
-        .bar-positive {
-            background: linear-gradient(90deg, #f093fb, #f5576c);
-        }
-
-        .risk-factors {
-            background: #fff3cd;
-            padding: 15px;
-            border-radius: 10px;
+        .action-required {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 8px;
             margin: 15px 0;
-        }
-
-        .risk-factors h4 {
-            color: #856404;
-            margin-bottom: 10px;
-        }
-
-        .risk-factors ul {
-            margin-left: 20px;
-            color: #856404;
+            font-weight: bold;
         }
 
         .specialists {
@@ -245,45 +156,16 @@
             margin-left: 20px;
         }
 
-        .advice-section {
-            margin: 15px 0;
+        .risk-factors {
+            background: #fff3cd;
             padding: 15px;
-            background: #f8f9fa;
             border-radius: 10px;
-        }
-
-        .advice-section h4 {
-            margin-bottom: 10px;
-            color: #28a745;
-        }
-
-        .advice-list {
-            list-style: none;
-            padding-left: 0;
-        }
-
-        .advice-list li {
-            padding: 6px 0;
-            padding-left: 25px;
-            position: relative;
-        }
-
-        .advice-list li:before {
-            content: "✓";
-            position: absolute;
-            left: 0;
-            color: #28a745;
-            font-weight: bold;
-        }
-
-        .action-required {
-            background: #f8d7da;
-            border: 1px solid #f5c6cb;
-            color: #721c24;
-            padding: 12px;
-            border-radius: 8px;
             margin: 15px 0;
-            font-weight: bold;
+        }
+
+        .risk-factors h4 {
+            color: #856404;
+            margin-bottom: 10px;
         }
 
         .loading {
@@ -321,13 +203,92 @@
             color: #856404;
         }
 
+        /* Searchable Dropdown Styles */
+        .searchable-dropdown {
+            position: relative;
+            width: 100%;
+        }
+
+        .symptom-search-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .symptom-search-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .dropdown-list {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            max-height: 250px;
+            overflow-y: auto;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 100;
+            margin-top: 5px;
+        }
+
+        .dropdown-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .dropdown-item:hover {
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+        }
+
+        .selected-symptoms-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+            min-height: 45px;
+        }
+
+        .symptom-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 25px;
+            font-size: 13px;
+        }
+
+        .symptom-tag span {
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            opacity: 0.8;
+        }
+
+        .symptom-tag span:hover {
+            opacity: 1;
+        }
+
+        .empty-selection {
+            color: #999;
+            font-size: 13px;
+            padding: 8px 0;
+        }
+
         @media (max-width: 768px) {
             .grid-2 {
                 grid-template-columns: 1fr;
-            }
-            
-            .prediction-text {
-                font-size: 1.5em;
             }
         }
     </style>
@@ -335,7 +296,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🏥 Smart Health Risk Assessment System</h1>
+            <h1>🩺 Cura - Smart Health Risk Assessment System</h1>
             <p>AI-powered health analysis with specialist recommendations and personalized advice</p>
         </div>
 
@@ -345,42 +306,36 @@
                 <h3>📋 Patient Health Assessment</h3>
                 <form id="predictionForm">
                     <div class="form-group">
-                        <label>🩺 Symptoms (Select all that apply):</label>
-                        <div class="symptom-grid">
-                            <div class="symptom-item">
-                                <input type="checkbox" id="Fever" value="1">
-                                <label for="Fever">🤒 Fever</label>
-                            </div>
-                            <div class="symptom-item">
-                                <input type="checkbox" id="Cough" value="1">
-                                <label for="Cough">😷 Cough</label>
-                            </div>
-                            <div class="symptom-item">
-                                <input type="checkbox" id="Fatigue" value="1">
-                                <label for="Fatigue">😴 Fatigue</label>
-                            </div>
-                            <div class="symptom-item">
-                                <input type="checkbox" id="Difficulty_Breathing" value="1">
-                                <label for="Difficulty_Breathing">🫁 Difficulty Breathing</label>
-                            </div>
-                            <div class="symptom-item">
-                                <input type="checkbox" id="Headache" value="1">
-                                <label for="Headache">🤕 Headache</label>
-                            </div>
-                            <div class="symptom-item">
-                                <input type="checkbox" id="SoreThroat" value="1">
-                                <label for="SoreThroat">😖 Sore Throat</label>
-                            </div>
-                            <div class="symptom-item">
-                                <input type="checkbox" id="BodyAche" value="1">
-                                <label for="BodyAche">💪 Body Ache</label>
-                            </div>
-                            <div class="symptom-item">
-                                <input type="checkbox" id="RunnyNose" value="1">
-                                <label for="RunnyNose">👃 Runny Nose</label>
+                        <label>🩺 Symptoms (Search & Select):</label>
+                        <div class="searchable-dropdown">
+                            <input type="text" 
+                                   id="symptomSearch" 
+                                   class="symptom-search-input" 
+                                   placeholder="🔍 Type to search symptoms..." 
+                                   autocomplete="off">
+                            <div id="symptomDropdown" class="dropdown-list" style="display: none;">
+                                <div class="dropdown-item" data-symptom="Fever">🤒 Fever</div>
+                                <div class="dropdown-item" data-symptom="Cough">😷 Cough</div>
+                                <div class="dropdown-item" data-symptom="Fatigue">😴 Fatigue</div>
+                                <div class="dropdown-item" data-symptom="Difficulty_Breathing">🫁 Difficulty Breathing</div>
+                                <div class="dropdown-item" data-symptom="Headache">🤕 Headache</div>
+                                <div class="dropdown-item" data-symptom="SoreThroat">😖 Sore Throat</div>
+                                <div class="dropdown-item" data-symptom="BodyAche">💪 Body Ache</div>
+                                <div class="dropdown-item" data-symptom="RunnyNose">👃 Runny Nose</div>
                             </div>
                         </div>
+                        <div id="selectedSymptoms" class="selected-symptoms-container"></div>
                     </div>
+
+                    <!-- Hidden inputs for symptoms -->
+                    <input type="hidden" id="selectedFever" value="0">
+                    <input type="hidden" id="selectedCough" value="0">
+                    <input type="hidden" id="selectedFatigue" value="0">
+                    <input type="hidden" id="selectedDifficulty_Breathing" value="0">
+                    <input type="hidden" id="selectedHeadache" value="0">
+                    <input type="hidden" id="selectedSoreThroat" value="0">
+                    <input type="hidden" id="selectedBodyAche" value="0">
+                    <input type="hidden" id="selectedRunnyNose" value="0">
 
                     <div class="form-group">
                         <label>📅 Age:</label>
@@ -431,31 +386,153 @@
         </div>
 
         <div class="card">
-            <div class="disclaimer" id="disclaimer">
+            <div class="disclaimer">
                 ⚠️ DISCLAIMER: This is an AI prediction system based on statistical analysis. This is not a substitute for professional medical advice, diagnosis, or treatment. Always seek the advice of your physician or other qualified health provider with any questions you may have regarding a medical condition.
             </div>
         </div>
     </div>
 
     <script>
+        // ============================================
+        // SEARCHABLE SYMPTOM DROPDOWN
+        // ============================================
+
+        const symptomList = [
+            { id: 'Fever', name: '🤒 Fever' },
+            { id: 'Cough', name: '😷 Cough' },
+            { id: 'Fatigue', name: '😴 Fatigue' },
+            { id: 'Difficulty_Breathing', name: '🫁 Difficulty Breathing' },
+            { id: 'Headache', name: '🤕 Headache' },
+            { id: 'SoreThroat', name: '😖 Sore Throat' },
+            { id: 'BodyAche', name: '💪 Body Ache' },
+            { id: 'RunnyNose', name: '👃 Runny Nose' }
+        ];
+
+        let selectedSymptoms = new Set();
+
+        const searchInput = document.getElementById('symptomSearch');
+        const dropdown = document.getElementById('symptomDropdown');
+        const selectedContainer = document.getElementById('selectedSymptoms');
+
+        const hiddenInputs = {
+            Fever: document.getElementById('selectedFever'),
+            Cough: document.getElementById('selectedCough'),
+            Fatigue: document.getElementById('selectedFatigue'),
+            Difficulty_Breathing: document.getElementById('selectedDifficulty_Breathing'),
+            Headache: document.getElementById('selectedHeadache'),
+            SoreThroat: document.getElementById('selectedSoreThroat'),
+            BodyAche: document.getElementById('selectedBodyAche'),
+            RunnyNose: document.getElementById('selectedRunnyNose')
+        };
+
+        function updateHiddenInputs() {
+            for (const [symptom, input] of Object.entries(hiddenInputs)) {
+                input.value = selectedSymptoms.has(symptom) ? 1 : 0;
+            }
+            console.log("Selected symptoms:", Array.from(selectedSymptoms));
+        }
+
+        function renderSelectedSymptoms() {
+            selectedContainer.innerHTML = '';
+            if (selectedSymptoms.size === 0) {
+                const emptyMsg = document.createElement('div');
+                emptyMsg.className = 'empty-selection';
+                emptyMsg.textContent = 'No symptoms selected. Type to search and add symptoms.';
+                selectedContainer.appendChild(emptyMsg);
+            } else {
+                selectedSymptoms.forEach(symptomId => {
+                    const symptom = symptomList.find(s => s.id === symptomId);
+                    if (symptom) {
+                        const tag = document.createElement('div');
+                        tag.className = 'symptom-tag';
+                        tag.innerHTML = `
+                            ${symptom.name}
+                            <span onclick="removeSymptom('${symptomId}')">✕</span>
+                        `;
+                        selectedContainer.appendChild(tag);
+                    }
+                });
+            }
+            updateHiddenInputs();
+        }
+
+        window.removeSymptom = function(symptomId) {
+            selectedSymptoms.delete(symptomId);
+            renderSelectedSymptoms();
+            filterSymptoms();
+        };
+
+        function addSymptom(symptomId) {
+            if (!selectedSymptoms.has(symptomId)) {
+                selectedSymptoms.add(symptomId);
+                renderSelectedSymptoms();
+                filterSymptoms();
+                searchInput.value = '';
+                dropdown.style.display = 'none';
+            }
+        }
+
+        function filterSymptoms() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const filtered = symptomList.filter(symptom => 
+                symptom.name.toLowerCase().includes(searchTerm) && 
+                !selectedSymptoms.has(symptom.id)
+            );
+            
+            if (filtered.length === 0) {
+                dropdown.innerHTML = '<div class="no-results" style="padding:15px;text-align:center;color:#999;">No matching symptoms found</div>';
+            } else {
+                dropdown.innerHTML = filtered.map(symptom => 
+                    `<div class="dropdown-item" data-symptom="${symptom.id}">${symptom.name}</div>`
+                ).join('');
+                
+                document.querySelectorAll('.dropdown-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        addSymptom(item.dataset.symptom);
+                    });
+                });
+            }
+        }
+
+        searchInput.addEventListener('focus', () => {
+            filterSymptoms();
+            dropdown.style.display = 'block';
+        });
+
+        searchInput.addEventListener('input', filterSymptoms);
+
+        document.addEventListener('click', (e) => {
+            if (!searchInput.contains(e.target) && !dropdown.contains(e.target)) {
+                dropdown.style.display = 'none';
+            }
+        });
+
+        renderSelectedSymptoms();
+
+        // ============================================
+        // FORM SUBMISSION
+        // ============================================
+
         document.getElementById('predictionForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            // Get form data
+            // Get form data from hidden inputs
             const formData = {
-                Fever: document.getElementById('Fever').checked ? 1 : 0,
-                Cough: document.getElementById('Cough').checked ? 1 : 0,
-                Fatigue: document.getElementById('Fatigue').checked ? 1 : 0,
-                Difficulty_Breathing: document.getElementById('Difficulty_Breathing').checked ? 1 : 0,
-                Headache: document.getElementById('Headache').checked ? 1 : 0,
-                SoreThroat: document.getElementById('SoreThroat').checked ? 1 : 0,
-                BodyAche: document.getElementById('BodyAche').checked ? 1 : 0,
-                RunnyNose: document.getElementById('RunnyNose').checked ? 1 : 0,
+                Fever: parseInt(document.getElementById('selectedFever').value),
+                Cough: parseInt(document.getElementById('selectedCough').value),
+                Fatigue: parseInt(document.getElementById('selectedFatigue').value),
+                Difficulty_Breathing: parseInt(document.getElementById('selectedDifficulty_Breathing').value),
+                Headache: parseInt(document.getElementById('selectedHeadache').value),
+                SoreThroat: parseInt(document.getElementById('selectedSoreThroat').value),
+                BodyAche: parseInt(document.getElementById('selectedBodyAche').value),
+                RunnyNose: parseInt(document.getElementById('selectedRunnyNose').value),
                 Age: parseInt(document.getElementById('Age').value),
                 Gender: parseInt(document.getElementById('Gender').value),
                 Blood_Pressure: parseInt(document.getElementById('Blood_Pressure').value),
                 Cholesterol_Level: parseInt(document.getElementById('Cholesterol_Level').value)
             };
+            
+            console.log("Sending data:", formData);
             
             // Show loading
             document.getElementById('loading').classList.add('show');
@@ -471,6 +548,7 @@
                 });
                 
                 const data = await response.json();
+                console.log("Response data:", data);
                 
                 if (response.ok) {
                     displayResults(data);
@@ -484,87 +562,47 @@
                 document.getElementById('loading').classList.remove('show');
             }
         });
-        
+
         function displayResults(data) {
             const resultContent = document.getElementById('resultContent');
-            const predictionClass = data.prediction === 'Positive' ? 'prediction-positive' : 'prediction-negative';
-            const predictionIcon = data.prediction === 'Positive' ? '⚠️' : '✅';
-            const severityColor = data.severity === 'Severe' ? '#dc3545' : (data.severity === 'Moderate' ? '#ffc107' : '#28a745');
             
             resultContent.innerHTML = `
-                <div class="prediction-box ${predictionClass}">
-                    <div class="prediction-text">${predictionIcon} ${data.prediction} Outcome</div>
+                <div class="prediction-box" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px;">
+                    <div style="font-size: 1.2em;">🩺 Predicted Disease</div>
+                    <div style="font-size: 2em; font-weight: bold;">${data.predicted_disease || data.disease || 'Unknown'}</div>
                     <div class="confidence">Confidence: ${data.confidence}%</div>
                 </div>
                 
                 <div style="text-align: center;">
-                    <div class="severity" style="background: ${severityColor}; color: white;">
-                        ${data.severity_icon} Severity: ${data.severity}
+                    <div class="severity" style="background: ${data.severity === 'Moderate' ? '#ffc107' : data.severity === 'Severe' ? '#dc3545' : '#28a745'}; color: white;">
+                        ${data.severity_icon || '🟢'} Severity: ${data.severity || 'Mild'}
                     </div>
                 </div>
                 
                 <div class="action-required">
                     <strong>🏥 Action Required:</strong><br>
-                    ${data.action_required}
-                </div>
-                
-                <div class="probability-bars">
-                    <div class="probability-bar">
-                        <div class="bar-label">
-                            <span>✅ Negative Outcome</span>
-                            <span>${data.probability_negative}%</span>
-                        </div>
-                        <div class="bar bar-negative" style="width: ${data.probability_negative}%">
-                            ${data.probability_negative > 15 ? data.probability_negative + '%' : ''}
-                        </div>
-                    </div>
-                    <div class="probability-bar">
-                        <div class="bar-label">
-                            <span>⚠️ Positive Outcome</span>
-                            <span>${data.probability_positive}%</span>
-                        </div>
-                        <div class="bar bar-positive" style="width: ${data.probability_positive}%">
-                            ${data.probability_positive > 15 ? data.probability_positive + '%' : ''}
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="risk-factors">
-                    <h4>⚠️ Risk Factors Identified:</h4>
-                    <ul>
-                        ${data.risk_factors.map(factor => `<li>${factor}</li>`).join('')}
-                    </ul>
+                    ${data.action_required || 'Monitor symptoms and maintain healthy lifestyle'}
                 </div>
                 
                 <div class="specialists">
                     <h4>👨‍⚕️ Recommended Specialists:</h4>
                     <ul>
-                        ${data.specialists.map(specialist => `<li>${specialist}</li>`).join('')}
-                    </ul>
-                </div>
-                
-                <div class="advice-section">
-                    <h4>💊 Symptom-Specific Advice:</h4>
-                    <ul class="advice-list">
-                        ${data.symptom_advice.map(advice => `<li>${advice}</li>`).join('')}
-                    </ul>
-                </div>
-                
-                <div class="advice-section">
-                    <h4>🥗 Lifestyle Recommendations:</h4>
-                    <ul class="advice-list">
-                        ${data.lifestyle_advice.map(advice => `<li>${advice}</li>`).join('')}
+                        ${(data.specialists || ['General Physician']).map(s => `<li>${s}</li>`).join('')}
                     </ul>
                 </div>
                 
                 <div class="risk-factors">
                     <h4>📋 Patient Summary:</h4>
                     <ul>
-                        <li>Age: ${data.age} years (${data.gender})</li>
-                        <li>Symptoms reported: ${data.symptoms_count}/8 (${data.symptoms_list.join(', ') || 'None'})</li>
-                        <li>Blood Pressure: ${data.bp_status}</li>
-                        <li>Cholesterol: ${data.cholesterol_status}</li>
+                        <li>Age: ${data.age || 0} years (${data.gender || 'Not specified'})</li>
+                        <li>Symptoms reported: ${data.symptoms_count || 0}/8</li>
+                        <li>Blood Pressure: ${data.bp_status || 'Normal'}</li>
+                        <li>Cholesterol: ${data.cholesterol_status || 'Normal'}</li>
                     </ul>
+                </div>
+                
+                <div class="disclaimer" style="margin-top: 15px;">
+                    ${data.disclaimer || '⚠️ This is an AI prediction. Please consult a real doctor.'}
                 </div>
             `;
             
@@ -572,8 +610,8 @@
         }
     </script>
     
-    <!-- Chatbot Scripts - Cura -->
-<script src="{{ url_for('static', filename='js/chatbot.js') }}"></script>
-<link rel="stylesheet" href="{{ url_for('static', filename='css/chatbot.css') }}">
+    <!-- Chatbot Scripts -->
+    <script src="{{ url_for('static', filename='js/chatbot.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/chatbot.css') }}">
 </body>
 </html>

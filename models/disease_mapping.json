@@ -1,0 +1,7 @@
+{
+    "Allergy": 0,
+    "Bronchitis": 1,
+    "COVID-19": 2,
+    "Common Cold": 3,
+    "Influenza": 4
+}
