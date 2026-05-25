@@ -6,15 +6,32 @@ import pandas as pd
 from datetime import datetime
 from chatbot import chatbot
 import uuid
+# Add these imports at the top of app.py
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for, flash
+from functools import wraps
+from database import create_user, authenticate_user, save_prediction, get_user_predictions
+
 
 app = Flask(__name__)
 
+# Add secret key (change this in production)
+app.secret_key = 'cura-health-secret-key-2024'
 # Load model and encoders
 print("Loading model and encoders...")
 model = joblib.load('models/disease_model.pkl')
 feature_columns = joblib.load('models/feature_columns.pkl')
 disease_encoder = joblib.load('models/disease_encoder.pkl')
 print("✅ Model loaded successfully!")
+
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            flash('Please login to access this page', 'error')
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
 
 # Enhanced Disease to Specialist Mapping
 specialist_mapping = {
@@ -254,6 +271,18 @@ def predict():
             patient_data['SoreThroat'], patient_data['BodyAche'], patient_data['RunnyNose']
         ])
         
+        # Get list of selected symptoms for saving to history
+        selected_symptoms_list = []
+        symptom_names = ['Fever', 'Cough', 'Fatigue', 'Difficulty_Breathing', 'Headache', 'SoreThroat', 'BodyAche', 'RunnyNose']
+        for symptom in symptom_names:
+            if patient_data.get(symptom, 0) == 1:
+                # Convert Difficulty_Breathing to readable format
+                if symptom == 'Difficulty_Breathing':
+                    selected_symptoms_list.append('Difficulty Breathing')
+                else:
+                    selected_symptoms_list.append(symptom)
+        symptoms_str = ', '.join(selected_symptoms_list) if selected_symptoms_list else 'None'
+        
         # Determine severity
         if symptoms_count >= 5 or predicted_disease in ['COVID-19', 'Influenza']:
             severity = "Moderate"
@@ -277,6 +306,25 @@ def predict():
             'Bronchitis': ['🫁 Pulmonologist', '👨‍⚕️ General Physician', '💊 Respiratory Therapist']
         }
         specialists = specialist_map.get(predicted_disease, ['👨‍⚕️ General Physician', '📞 Telehealth consultation'])
+        specialists_str = ', '.join(specialists)
+        
+        # ============================================
+        # SAVE PREDICTION TO HISTORY (IF USER LOGGED IN)
+        # ============================================
+        if 'user_id' in session:
+            try:
+                from database import save_prediction
+                save_prediction(
+                    session['user_id'],
+                    symptoms_str,
+                    predicted_disease,
+                    confidence,
+                    severity,
+                    specialists_str
+                )
+                print(f"✅ Prediction saved for user: {session.get('username', 'Unknown')}")
+            except Exception as e:
+                print(f"⚠️ Could not save prediction: {e}")
         
         response = {
             'predicted_disease': predicted_disease,
@@ -300,9 +348,79 @@ def predict():
         print(f"Error: {e}")
         import traceback
         traceback.print_exc()
-        return jsonify({'error': str(e)}), 500   
-# Add this route after your existing routes
+        return jsonify({'error': str(e)}), 500
+    # Add this route after your existing routes
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        
+        result = authenticate_user(username, password)
+        
+        if result['success']:
+            session['user_id'] = result['user_id']
+            session['username'] = result['username']
+            session['email'] = result['email']
+            flash(f'Welcome back, {username}!', 'success')
+            return redirect(url_for('dashboard'))
+        else:
+            flash(result['error'], 'error')
+    
+    return render_template('login.html')
 
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form['username']
+        email = request.form['email']
+        password = request.form['password']
+        confirm_password = request.form['confirm_password']
+        
+        if password != confirm_password:
+            flash('Passwords do not match', 'error')
+            return render_template('register.html')
+        
+        if len(password) < 6:
+            flash('Password must be at least 6 characters', 'error')
+            return render_template('register.html')
+        
+        result = create_user(username, email, password)
+        
+        if result['success']:
+            flash('Registration successful! Please login.', 'success')
+            return redirect(url_for('login'))
+        else:
+            flash(result['error'], 'error')
+    
+    return render_template('register.html')
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    flash('You have been logged out', 'success')
+    return redirect(url_for('login'))
+
+@app.route('/dashboard')
+@login_required
+def dashboard():
+    predictions = get_user_predictions(session['user_id'])
+    
+    unique_diseases = len(set(p['disease'] for p in predictions)) if predictions else 0
+    avg_confidence = sum(p['confidence'] for p in predictions) / len(predictions) if predictions else 0
+    
+    # Calculate severity counts for dashboard
+    severity_counts = {'Mild': 0, 'Moderate': 0, 'Severe': 0, 'Minimal': 0}
+    for pred in predictions:
+        severity = pred.get('severity', 'Mild')
+        if severity in severity_counts:
+            severity_counts[severity] += 1
+    
+    return render_template('dashboard.html', 
+                         predictions=predictions,
+                         unique_diseases=unique_diseases,
+                         avg_confidence=avg_confidence,
+                         severity_counts=severity_counts)
 # Add this import at the top
 from nlp_processor import nlp_processor
 

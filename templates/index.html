@@ -4,37 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Cura - Smart Health Risk Assessment System</title>
+    
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        .btn-apply-nlp {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: bold;
-    transition: transform 0.2s;
-}
 
-.btn-apply-nlp:hover {
-    transform: scale(1.02);
-}
-
-.success-message {
-    animation: fadeOut 3s forwards;
-}
-
-@keyframes fadeOut {
-    0% { opacity: 1; }
-    70% { opacity: 1; }
-    100% { opacity: 0; display: none; }
-}
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -45,6 +25,7 @@
         .container {
             max-width: 1400px;
             margin: 0 auto;
+            padding-top: 60px;
         }
 
         .header {
@@ -63,7 +44,45 @@
             opacity: 0.9;
         }
 
-        /* Responsive Grid */
+        /* User Navigation Bar */
+        .user-nav {
+            position: fixed;
+            top: 10px;
+            right: 20px;
+            z-index: 1000;
+            background: white;
+            border-radius: 25px;
+            padding: 8px 18px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-nav a {
+            text-decoration: none;
+        }
+
+        .user-nav .username {
+            color: #667eea;
+        }
+
+        .user-nav .dashboard-link {
+            color: #28a745;
+        }
+
+        .user-nav .logout-link {
+            color: #dc3545;
+        }
+
+        .user-nav .login-link {
+            color: #667eea;
+        }
+
+        .user-nav .register-link {
+            color: #28a745;
+        }
+
         .grid-2 {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -119,10 +138,6 @@
         .btn-predict:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-        }
-
-        .btn-predict:active {
-            transform: translateY(0);
         }
 
         .result-card {
@@ -187,10 +202,6 @@
             margin-left: 20px;
         }
 
-        .specialists li {
-            margin: 5px 0;
-        }
-
         .risk-factors {
             background: #fff3cd;
             border-left: 4px solid #ffc107;
@@ -202,14 +213,6 @@
         .risk-factors h4 {
             color: #856404;
             margin-bottom: 10px;
-        }
-
-        .risk-factors ul {
-            margin-left: 20px;
-        }
-
-        .risk-factors li {
-            margin: 5px 0;
         }
 
         .loading {
@@ -246,6 +249,49 @@
             font-size: 0.85em;
             color: #856404;
             text-align: center;
+        }
+
+        /* Chart Container Styles */
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: 1px solid #e0e0e0;
+        }
+
+        .chart-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+            text-align: center;
+        }
+
+        .probability-chart {
+            max-height: 280px;
+        }
+
+        .disease-prediction-list {
+            margin-top: 15px;
+        }
+
+        .prediction-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .prediction-name {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .prediction-prob {
+            color: #667eea;
+            font-weight: bold;
         }
 
         /* Searchable Dropdown Styles */
@@ -315,88 +361,6 @@
             animation: fadeIn 0.2s ease;
         }
 
-        /* NLP Input Styles */
-.nlp-input-container {
-    position: relative;
-}
-
-.nlp-textarea {
-    width: 100%;
-    padding: 12px 15px;
-    border: 2px solid #e0e0e0;
-    border-radius: 10px;
-    font-size: 14px;
-    font-family: inherit;
-    resize: vertical;
-    transition: border-color 0.3s;
-}
-
-.nlp-textarea:focus {
-    outline: none;
-    border-color: #667eea;
-}
-
-.nlp-process-btn {
-    margin-top: 10px;
-    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: transform 0.2s;
-    width: 100%;
-}
-
-.nlp-process-btn:hover {
-    transform: translateY(-2px);
-}
-
-.nlp-warning {
-    background: #fff3cd;
-    border-left: 4px solid #ffc107;
-    padding: 12px;
-    border-radius: 8px;
-    margin-top: 10px;
-    font-size: 13px;
-}
-
-.nlp-warning.warning {
-    background: #f8d7da;
-    border-left-color: #dc3545;
-    color: #721c24;
-}
-
-.nlp-detected {
-    background: #d4edda;
-    border-left: 4px solid #28a745;
-    padding: 12px;
-    border-radius: 8px;
-    margin-top: 10px;
-    font-size: 13px;
-}
-
-.nlp-detected span {
-    font-weight: bold;
-    color: #155724;
-}
-
-.nlp-suggestion {
-    background: #e3f2fd;
-    border-left: 4px solid #1976d2;
-    padding: 12px;
-    border-radius: 8px;
-    margin-top: 8px;
-    font-size: 13px;
-}
-
-@media (max-width: 768px) {
-    .nlp-textarea {
-        font-size: 16px; /* Prevents zoom on mobile */
-    }
-}
-
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -413,7 +377,6 @@
             font-weight: bold;
             font-size: 16px;
             opacity: 0.8;
-            transition: opacity 0.2s;
         }
 
         .symptom-tag span:hover {
@@ -432,26 +395,86 @@
             opacity: 0.9;
         }
 
-        /* Mobile Responsive Styles */
-        @media (max-width: 1024px) {
-            .container {
-                max-width: 100%;
-            }
-            
-            .card {
-                padding: 20px;
-            }
-            
-            .header h1 {
-                font-size: 2em;
-            }
+        /* NLP Styles */
+        .nlp-input-container {
+            position: relative;
+        }
+
+        .nlp-textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: inherit;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+
+        .nlp-textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .nlp-process-btn {
+            margin-top: 10px;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s;
+            width: 100%;
+        }
+
+        .nlp-process-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .nlp-warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 13px;
+        }
+
+        .nlp-warning.warning {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+            color: #721c24;
+        }
+
+        .nlp-detected {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 13px;
+        }
+
+        .btn-apply-nlp {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: bold;
+            margin-top: 10px;
+            transition: transform 0.2s;
+        }
+
+        .btn-apply-nlp:hover {
+            transform: scale(1.02);
         }
 
         @media (max-width: 768px) {
-            body {
-                padding: 15px;
-            }
-            
             .grid-2 {
                 grid-template-columns: 1fr;
                 gap: 15px;
@@ -461,145 +484,36 @@
                 font-size: 1.6em;
             }
             
-            .header p {
-                font-size: 0.9em;
-            }
-            
-            .card {
-                padding: 18px;
-            }
-            
-            .btn-predict {
-                padding: 12px 20px;
-                font-size: 14px;
-            }
-            
-            .prediction-box div[style*="font-size: 2em"] {
-                font-size: 1.5em !important;
-            }
-            
-            .symptom-search-input {
-                padding: 10px 12px;
-                font-size: 13px;
-            }
-            
-            .dropdown-item {
-                padding: 10px 12px;
-                font-size: 13px;
-            }
-            
-            .symptom-tag {
-                padding: 5px 10px;
+            .user-nav {
+                padding: 6px 12px;
                 font-size: 12px;
+                gap: 8px;
             }
             
-            .specialists ul, .risk-factors ul {
-                margin-left: 15px;
-            }
-            
-            .specialists li, .risk-factors li {
-                font-size: 13px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            body {
-                padding: 10px;
-            }
-            
-            .header h1 {
-                font-size: 1.3em;
-            }
-            
-            .header p {
-                font-size: 0.8em;
-            }
-            
-            .card {
-                padding: 15px;
-            }
-            
-            .card h3 {
-                font-size: 1.1em;
-            }
-            
-            .form-group label {
-                font-size: 13px;
-            }
-            
-            select, input[type="number"] {
-                padding: 10px;
-                font-size: 13px;
-            }
-            
-            .btn-predict {
-                padding: 10px 16px;
-                font-size: 13px;
-            }
-            
-            .prediction-box div[style*="font-size: 2em"] {
-                font-size: 1.3em !important;
-            }
-            
-            .severity {
-                padding: 6px 18px;
-                font-size: 12px;
-            }
-            
-            .action-required, .specialists, .risk-factors {
+            .chart-container {
                 padding: 12px;
             }
             
-            .action-required strong, .specialists h4, .risk-factors h4 {
-                font-size: 13px;
+            .probability-chart {
+                max-height: 200px;
             }
-            
-            .disclaimer {
-                font-size: 0.75em;
-                padding: 12px;
-            }
-        }
-
-        /* Tablet Styles */
-        @media (min-width: 769px) and (max-width: 1024px) {
-            .grid-2 {
-                gap: 15px;
-            }
-            
-            .card {
-                padding: 20px;
-            }
-            
-            .header h1 {
-                font-size: 2.2em;
-            }
-        }
-
-        /* Touch-friendly for mobile */
-        @media (hover: none) and (pointer: coarse) {
-            .btn-predict, .dropdown-item, .symptom-tag span {
-                min-height: 44px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-            
-            .dropdown-item {
-                padding: 14px 15px;
-            }
-            
-            .symptom-tag span {
-                padding: 0 5px;
-            }
-        }
-
-        /* Smooth scrolling */
-        html {
-            scroll-behavior: smooth;
         }
     </style>
 </head>
 <body>
+    <!-- User Navigation Bar -->
+    <div class="user-nav">
+        {% if session.user_id %}
+            <span class="username">👋 {{ session.username }}</span>
+            <a href="{{ url_for('dashboard') }}" class="dashboard-link">📊 Dashboard</a>
+            <a href="{{ url_for('logout') }}" class="logout-link">🚪 Logout</a>
+        {% else %}
+            <a href="{{ url_for('login') }}" class="login-link">🔐 Login</a>
+            <span style="color:#ccc;">|</span>
+            <a href="{{ url_for('register') }}" class="register-link">📝 Register</a>
+        {% endif %}
+    </div>
+
     <div class="container">
         <div class="header">
             <h1>🩺 Cura - Smart Health Risk Assessment System</h1>
@@ -633,6 +547,22 @@
                         <div id="selectedSymptoms" class="selected-symptoms-container"></div>
                     </div>
 
+                    <!-- NLP Input Section -->
+                    <div class="form-group">
+                        <label>💬 Or Describe Your Symptoms (NLP):</label>
+                        <div class="nlp-input-container">
+                            <textarea id="nlpInput" 
+                                      class="nlp-textarea" 
+                                      rows="2" 
+                                      placeholder="Example: 'I have fever and headache since yesterday' or 'Feeling tired with cough'"></textarea>
+                            <button type="button" id="nlpProcessBtn" class="nlp-process-btn">
+                                🔍 Analyze Text
+                            </button>
+                        </div>
+                        <div id="nlpWarning" class="nlp-warning" style="display: none;"></div>
+                        <div id="nlpDetected" class="nlp-detected" style="display: none;"></div>
+                    </div>
+
                     <!-- Hidden inputs for symptoms -->
                     <input type="hidden" id="selectedFever" value="0">
                     <input type="hidden" id="selectedCough" value="0">
@@ -643,21 +573,6 @@
                     <input type="hidden" id="selectedBodyAche" value="0">
                     <input type="hidden" id="selectedRunnyNose" value="0">
 
-                    <!-- Add this after the dropdown section or before the form-group -->
-<div class="form-group">
-    <label>💬 Or Describe Your Symptoms (NLP):</label>
-    <div class="nlp-input-container">
-        <textarea id="nlpInput" 
-                  class="nlp-textarea" 
-                  rows="3" 
-                  placeholder="Example: 'I have fever and headache since yesterday' or 'Feeling tired with cough and body ache'"></textarea>
-        <button type="button" id="nlpProcessBtn" class="nlp-process-btn">
-            🔍 Analyze Text
-        </button>
-    </div>
-    <div id="nlpWarning" class="nlp-warning" style="display: none;"></div>
-    <div id="nlpDetected" class="nlp-detected" style="display: none;"></div>
-</div>
                     <div class="form-group">
                         <label>📅 Age:</label>
                         <input type="number" id="Age" name="Age" value="30" min="0" max="120" required>
@@ -765,10 +680,7 @@
                     if (symptom) {
                         const tag = document.createElement('div');
                         tag.className = 'symptom-tag';
-                        tag.innerHTML = `
-                            ${symptom.name}
-                            <span onclick="removeSymptom('${symptomId}')">✕</span>
-                        `;
+                        tag.innerHTML = `${symptom.name} <span onclick="removeSymptom('${symptomId}')">✕</span>`;
                         selectedContainer.appendChild(tag);
                     }
                 });
@@ -830,6 +742,162 @@
         renderSelectedSymptoms();
 
         // ============================================
+        // NLP SYMPTOM DETECTION
+        // ============================================
+
+        const nlpInput = document.getElementById('nlpInput');
+        const nlpProcessBtn = document.getElementById('nlpProcessBtn');
+        const nlpWarning = document.getElementById('nlpWarning');
+        const nlpDetected = document.getElementById('nlpDetected');
+
+        nlpProcessBtn.addEventListener('click', async () => {
+            const text = nlpInput.value.trim();
+            
+            if (!text) {
+                nlpWarning.innerHTML = '⚠️ Please describe your symptoms first.';
+                nlpWarning.style.display = 'block';
+                nlpWarning.className = 'nlp-warning warning';
+                return;
+            }
+            
+            nlpProcessBtn.textContent = '⏳ Processing...';
+            nlpProcessBtn.disabled = true;
+            
+            try {
+                const response = await fetch('/api/nlp_process', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: text })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    nlpWarning.style.display = 'none';
+                    nlpDetected.style.display = 'none';
+                    
+                    if (data.has_unknown) {
+                        let warningHtml = '<div><strong>⚠️ Unknown Symptoms Detected:</strong></div><ul>';
+                        for (let i = 0; i < data.unknown_symptoms.length; i++) {
+                            warningHtml += `<li>${data.warnings[i]}</li>`;
+                            if (data.suggestions[i]) {
+                                warningHtml += `<li class="text-muted" style="color:#666;">${data.suggestions[i]}</li>`;
+                            }
+                        }
+                        warningHtml += '</ul>';
+                        nlpWarning.innerHTML = warningHtml;
+                        nlpWarning.style.display = 'block';
+                        nlpWarning.className = 'nlp-warning warning';
+                    }
+                    
+                    if (data.has_known) {
+                        nlpDetected.innerHTML = `
+                            <div><strong>✅ Detected Symptoms:</strong> ${data.detected_symptoms.join(', ')}</div>
+                            <button id="applyNlpSymptoms" class="btn-apply-nlp">📋 Apply These Symptoms</button>
+                        `;
+                        nlpDetected.style.display = 'block';
+                        
+                        const applyBtn = document.getElementById('applyNlpSymptoms');
+                        if (applyBtn) {
+                            applyBtn.addEventListener('click', () => {
+                                selectedSymptoms.clear();
+                                data.detected_symptoms.forEach(symptom => {
+                                    selectedSymptoms.add(symptom);
+                                });
+                                renderSelectedSymptoms();
+                                nlpInput.value = '';
+                                nlpWarning.style.display = 'none';
+                                nlpDetected.style.display = 'none';
+                            });
+                        }
+                    } else if (!data.has_known && data.has_unknown) {
+                        nlpDetected.innerHTML = `<div style="color: #856404;">❌ No recognized symptoms found. Please use the dropdown to select symptoms.</div>`;
+                        nlpDetected.style.display = 'block';
+                    }
+                } else {
+                    nlpWarning.innerHTML = `⚠️ Error: ${data.error}`;
+                    nlpWarning.style.display = 'block';
+                    nlpWarning.className = 'nlp-warning warning';
+                }
+            } catch (error) {
+                nlpWarning.innerHTML = '⚠️ Network error. Please try again.';
+                nlpWarning.style.display = 'block';
+                nlpWarning.className = 'nlp-warning warning';
+            } finally {
+                nlpProcessBtn.textContent = '🔍 Analyze Text';
+                nlpProcessBtn.disabled = false;
+            }
+        });
+
+        // ============================================
+        // CHART.JS INTEGRATION
+        // ============================================
+
+        let probabilityChart = null;
+
+        function createProbabilityChart(probabilities) {
+            const canvas = document.getElementById('probabilityChart');
+            if (!canvas) return;
+            
+            if (probabilityChart) {
+                probabilityChart.destroy();
+            }
+            
+            const diseases = probabilities.map(p => p.disease);
+            const values = probabilities.map(p => p.probability);
+            const colors = values.map(v => {
+                if (v >= 70) return '#28a745';
+                if (v >= 40) return '#ffc107';
+                return '#dc3545';
+            });
+            
+            probabilityChart = new Chart(canvas, {
+                type: 'bar',
+                data: {
+                    labels: diseases,
+                    datasets: [{
+                        label: 'Probability (%)',
+                        data: values,
+                        backgroundColor: colors,
+                        borderColor: colors,
+                        borderWidth: 1,
+                        borderRadius: 8,
+                        barPercentage: 0.65
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: { font: { size: 12 } }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.raw}% probability`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            title: { display: true, text: 'Probability (%)', font: { size: 12 } },
+                            grid: { color: '#e0e0e0' }
+                        },
+                        x: {
+                            title: { display: true, text: 'Diseases', font: { size: 12 } },
+                            ticks: { rotation: 30, maxRotation: 30, font: { size: 11 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ============================================
         // FORM SUBMISSION
         // ============================================
 
@@ -857,9 +925,7 @@
             try {
                 const response = await fetch('/predict', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(formData)
                 });
                 
@@ -885,6 +951,27 @@
             if (data.severity === 'Moderate') severityColor = '#ffc107';
             if (data.severity === 'Severe') severityColor = '#dc3545';
             
+            // Prepare top predictions for chart
+            const topPredictions = data.top_3_predictions || [
+                { disease: data.predicted_disease, probability: data.confidence },
+                { disease: 'Other', probability: (100 - data.confidence).toFixed(2) }
+            ];
+            
+            const chartHTML = `
+                <div class="chart-container">
+                    <div class="chart-title">📊 Disease Probability Distribution</div>
+                    <canvas id="probabilityChart" class="probability-chart" style="max-height: 250px;"></canvas>
+                    <div class="disease-prediction-list">
+                        ${topPredictions.map(p => `
+                            <div class="prediction-item">
+                                <span class="prediction-name">🩺 ${p.disease}</span>
+                                <span class="prediction-prob">${p.probability}%</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            
             resultContent.innerHTML = `
                 <div class="prediction-box" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
                     <div style="font-size: 1.1em; opacity: 0.9;">🩺 Predicted Disease</div>
@@ -897,6 +984,8 @@
                         ${data.severity_icon || '🟢'} Severity: ${data.severity || 'Mild'}
                     </div>
                 </div>
+                
+                ${chartHTML}
                 
                 <div class="action-required">
                     <strong>🏥 Action Required:</strong><br>
@@ -926,125 +1015,12 @@
             `;
             
             document.getElementById('resultCard').classList.add('show');
-            document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-        // ============================================
-// NLP SYMPTOM DETECTION
-// ============================================
-
-const nlpInput = document.getElementById('nlpInput');
-const nlpProcessBtn = document.getElementById('nlpProcessBtn');
-const nlpWarning = document.getElementById('nlpWarning');
-const nlpDetected = document.getElementById('nlpDetected');
-
-nlpProcessBtn.addEventListener('click', async () => {
-    const text = nlpInput.value.trim();
-    
-    if (!text) {
-        nlpWarning.innerHTML = '⚠️ Please describe your symptoms first.';
-        nlpWarning.style.display = 'block';
-        nlpWarning.className = 'nlp-warning warning';
-        return;
-    }
-    
-    // Show loading state
-    nlpProcessBtn.textContent = '⏳ Processing...';
-    nlpProcessBtn.disabled = true;
-    
-    try {
-        const response = await fetch('/api/nlp_process', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ text: text })
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            // Clear previous displays
-            nlpWarning.style.display = 'none';
-            nlpDetected.style.display = 'none';
             
-            // Show warnings for unknown symptoms
-            if (data.has_unknown) {
-                let warningHtml = '<div><strong>⚠️ Unknown Symptoms Detected:</strong></div><ul>';
-                for (let i = 0; i < data.unknown_symptoms.length; i++) {
-                    warningHtml += `<li>${data.warnings[i]}</li>`;
-                    if (data.suggestions[i]) {
-                        warningHtml += `<li class="text-muted">${data.suggestions[i]}</li>`;
-                    }
-                }
-                warningHtml += '</ul>';
-                nlpWarning.innerHTML = warningHtml;
-                nlpWarning.style.display = 'block';
-                nlpWarning.className = 'nlp-warning warning';
-            }
-            
-            // Show detected symptoms
-            if (data.has_known) {
-                nlpDetected.innerHTML = `
-                    <div><span>✅ Detected Symptoms:</span> ${data.detected_symptoms.join(', ')}</div>
-                    <div style="margin-top: 10px;">
-                        <button id="applyNlpSymptoms" class="btn-apply-nlp">📋 Apply These Symptoms</button>
-                    </div>
-                `;
-                nlpDetected.style.display = 'block';
-                
-                // Add apply button functionality
-                const applyBtn = document.getElementById('applyNlpSymptoms');
-                if (applyBtn) {
-                    applyBtn.addEventListener('click', () => {
-                        // Clear current selections
-                        selectedSymptoms.clear();
-                        
-                        // Add detected symptoms
-                        data.detected_symptoms.forEach(symptom => {
-                            selectedSymptoms.add(symptom);
-                        });
-                        
-                        // Re-render
-                        renderSelectedSymptoms();
-                        
-                        // Clear NLP input
-                        nlpInput.value = '';
-                        nlpWarning.style.display = 'none';
-                        nlpDetected.style.display = 'none';
-                        
-                        // Show success message
-                        const tempMsg = document.createElement('div');
-                        tempMsg.className = 'success-message';
-                        tempMsg.innerHTML = '✅ Symptoms applied to form! Click "Analyze Health Risk" to continue.';
-                        tempMsg.style.cssText = 'background: #d4edda; padding: 10px; border-radius: 8px; margin-top: 10px; color: #155724;';
-                        nlpDetected.appendChild(tempMsg);
-                        setTimeout(() => tempMsg.remove(), 3000);
-                    });
-                }
-            } else if (!data.has_known && data.has_unknown) {
-                nlpDetected.innerHTML = `
-                    <div style="color: #856404;">
-                        ❌ No recognized symptoms found.<br>
-                        Please use the dropdown to select from: Fever, Cough, Fatigue, Difficulty Breathing, Headache, Sore Throat, Body Ache, Runny Nose
-                    </div>
-                `;
-                nlpDetected.style.display = 'block';
-            }
-        } else {
-            nlpWarning.innerHTML = `⚠️ Error: ${data.error}`;
-            nlpWarning.style.display = 'block';
-            nlpWarning.className = 'nlp-warning warning';
+            // Create chart after results are displayed
+            setTimeout(() => {
+                createProbabilityChart(topPredictions);
+            }, 100);
         }
-    } catch (error) {
-        console.error('Error:', error);
-        nlpWarning.innerHTML = '⚠️ Network error. Please try again.';
-        nlpWarning.style.display = 'block';
-        nlpWarning.className = 'nlp-warning warning';
-    } finally {
-        nlpProcessBtn.textContent = '🔍 Analyze Text';
-        nlpProcessBtn.disabled = false;
-    }
-});
     </script>
     
     <!-- Chatbot Scripts -->
