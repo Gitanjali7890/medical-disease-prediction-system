@@ -65,6 +65,7 @@
 
         .user-nav .username {
             color: #667eea;
+            font-weight: bold;
         }
 
         .user-nav .dashboard-link {
@@ -81,6 +82,11 @@
 
         .user-nav .register-link {
             color: #28a745;
+        }
+
+        .guest-text {
+            color: #999;
+            font-size: 14px;
         }
 
         .grid-2 {
@@ -474,6 +480,97 @@
             transform: scale(1.02);
         }
 
+        /* Modal Styles */
+        .login-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: modalFadeIn 0.3s ease;
+        }
+
+        .login-modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 35px;
+            max-width: 400px;
+            text-align: center;
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes modalSlideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-icon {
+            font-size: 50px;
+            margin-bottom: 15px;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .modal-text {
+            color: #666;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .modal-btn {
+            padding: 10px 25px;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: transform 0.2s;
+        }
+
+        .modal-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .modal-btn-login {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .modal-btn-register {
+            background: #28a745;
+            color: white;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: #999;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
         @media (max-width: 768px) {
             .grid-2 {
                 grid-template-columns: 1fr;
@@ -497,6 +594,11 @@
             .probability-chart {
                 max-height: 200px;
             }
+
+            .login-modal-content {
+                margin: 20px;
+                padding: 25px;
+            }
         }
     </style>
 </head>
@@ -508,6 +610,7 @@
             <a href="{{ url_for('dashboard') }}" class="dashboard-link">📊 Dashboard</a>
             <a href="{{ url_for('logout') }}" class="logout-link">🚪 Logout</a>
         {% else %}
+            <span class="guest-text">👤 Guest</span>
             <a href="{{ url_for('login') }}" class="login-link">🔐 Login</a>
             <span style="color:#ccc;">|</span>
             <a href="{{ url_for('register') }}" class="register-link">📝 Register</a>
@@ -628,129 +731,185 @@
         </div>
     </div>
 
-    <script>
-        // ============================================
-        // SEARCHABLE SYMPTOM DROPDOWN
-        // ============================================
-
-        const symptomList = [
-            { id: 'Fever', name: '🤒 Fever' },
-            { id: 'Cough', name: '😷 Cough' },
-            { id: 'Fatigue', name: '😴 Fatigue' },
-            { id: 'Difficulty_Breathing', name: '🫁 Difficulty Breathing' },
-            { id: 'Headache', name: '🤕 Headache' },
-            { id: 'SoreThroat', name: '😖 Sore Throat' },
-            { id: 'BodyAche', name: '💪 Body Ache' },
-            { id: 'RunnyNose', name: '👃 Runny Nose' }
-        ];
-
-        let selectedSymptoms = new Set();
-
-        const searchInput = document.getElementById('symptomSearch');
-        const dropdown = document.getElementById('symptomDropdown');
-        const selectedContainer = document.getElementById('selectedSymptoms');
-
-        const hiddenInputs = {
-            Fever: document.getElementById('selectedFever'),
-            Cough: document.getElementById('selectedCough'),
-            Fatigue: document.getElementById('selectedFatigue'),
-            Difficulty_Breathing: document.getElementById('selectedDifficulty_Breathing'),
-            Headache: document.getElementById('selectedHeadache'),
-            SoreThroat: document.getElementById('selectedSoreThroat'),
-            BodyAche: document.getElementById('selectedBodyAche'),
-            RunnyNose: document.getElementById('selectedRunnyNose')
-        };
-
-        function updateHiddenInputs() {
-            for (const [symptom, input] of Object.entries(hiddenInputs)) {
-                input.value = selectedSymptoms.has(symptom) ? 1 : 0;
-            }
+<script>
+    // ============================================
+    // LOGIN REQUIRED MODAL
+    // ============================================
+    
+    // Check if user is logged in - This will be populated by Flask
+    const isLoggedIn = {{ 'true' if session.user_id else 'false' }};
+    
+    function showLoginModal() {
+        // Remove any existing modal
+        const existingModal = document.getElementById('loginModal');
+        if (existingModal) {
+            existingModal.remove();
         }
-
-        function renderSelectedSymptoms() {
-            selectedContainer.innerHTML = '';
-            if (selectedSymptoms.size === 0) {
-                const emptyMsg = document.createElement('div');
-                emptyMsg.className = 'empty-selection';
-                emptyMsg.textContent = 'No symptoms selected. Type to search and add symptoms.';
-                selectedContainer.appendChild(emptyMsg);
-            } else {
-                selectedSymptoms.forEach(symptomId => {
-                    const symptom = symptomList.find(s => s.id === symptomId);
-                    if (symptom) {
-                        const tag = document.createElement('div');
-                        tag.className = 'symptom-tag';
-                        tag.innerHTML = `${symptom.name} <span onclick="removeSymptom('${symptomId}')">✕</span>`;
-                        selectedContainer.appendChild(tag);
-                    }
-                });
-            }
-            updateHiddenInputs();
+        
+        // Create modal
+        const modal = document.createElement('div');
+        modal.id = 'loginModal';
+        modal.className = 'login-modal';
+        modal.innerHTML = `
+            <div class="login-modal-content">
+                <div class="modal-icon">🔐</div>
+                <h2 class="modal-title">Login Required</h2>
+                <p class="modal-text">Please login or register to analyze symptoms and save your health history. Your predictions will be saved to your account!</p>
+                <div class="modal-buttons">
+                    <a href="{{ url_for('login') }}" class="modal-btn modal-btn-login">Login</a>
+                    <a href="{{ url_for('register') }}" class="modal-btn modal-btn-register">Register</a>
+                </div>
+                <button onclick="closeLoginModal()" class="modal-close">Close</button>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+    
+    function closeLoginModal() {
+        const modal = document.getElementById('loginModal');
+        if (modal) {
+            modal.remove();
         }
+    }
+    
+    // Also make these functions available globally
+    window.showLoginModal = showLoginModal;
+    window.closeLoginModal = closeLoginModal;
+    
+    // ============================================
+    // SEARCHABLE SYMPTOM DROPDOWN
+    // ============================================
 
-        window.removeSymptom = function(symptomId) {
-            selectedSymptoms.delete(symptomId);
+    const symptomList = [
+        { id: 'Fever', name: '🤒 Fever' },
+        { id: 'Cough', name: '😷 Cough' },
+        { id: 'Fatigue', name: '😴 Fatigue' },
+        { id: 'Difficulty_Breathing', name: '🫁 Difficulty Breathing' },
+        { id: 'Headache', name: '🤕 Headache' },
+        { id: 'SoreThroat', name: '😖 Sore Throat' },
+        { id: 'BodyAche', name: '💪 Body Ache' },
+        { id: 'RunnyNose', name: '👃 Runny Nose' }
+    ];
+
+    let selectedSymptoms = new Set();
+
+    const searchInput = document.getElementById('symptomSearch');
+    const dropdown = document.getElementById('symptomDropdown');
+    const selectedContainer = document.getElementById('selectedSymptoms');
+
+    const hiddenInputs = {
+        Fever: document.getElementById('selectedFever'),
+        Cough: document.getElementById('selectedCough'),
+        Fatigue: document.getElementById('selectedFatigue'),
+        Difficulty_Breathing: document.getElementById('selectedDifficulty_Breathing'),
+        Headache: document.getElementById('selectedHeadache'),
+        SoreThroat: document.getElementById('selectedSoreThroat'),
+        BodyAche: document.getElementById('selectedBodyAche'),
+        RunnyNose: document.getElementById('selectedRunnyNose')
+    };
+
+    function updateHiddenInputs() {
+        for (const [symptom, input] of Object.entries(hiddenInputs)) {
+            input.value = selectedSymptoms.has(symptom) ? 1 : 0;
+        }
+    }
+
+    function renderSelectedSymptoms() {
+        selectedContainer.innerHTML = '';
+        if (selectedSymptoms.size === 0) {
+            const emptyMsg = document.createElement('div');
+            emptyMsg.className = 'empty-selection';
+            emptyMsg.textContent = 'No symptoms selected. Type to search and add symptoms.';
+            selectedContainer.appendChild(emptyMsg);
+        } else {
+            selectedSymptoms.forEach(symptomId => {
+                const symptom = symptomList.find(s => s.id === symptomId);
+                if (symptom) {
+                    const tag = document.createElement('div');
+                    tag.className = 'symptom-tag';
+                    tag.innerHTML = `${symptom.name} <span onclick="removeSymptom('${symptomId}')">✕</span>`;
+                    selectedContainer.appendChild(tag);
+                }
+            });
+        }
+        updateHiddenInputs();
+    }
+
+    window.removeSymptom = function(symptomId) {
+        selectedSymptoms.delete(symptomId);
+        renderSelectedSymptoms();
+        filterSymptoms();
+    };
+
+    function addSymptom(symptomId) {
+        if (!selectedSymptoms.has(symptomId)) {
+            selectedSymptoms.add(symptomId);
             renderSelectedSymptoms();
             filterSymptoms();
-        };
-
-        function addSymptom(symptomId) {
-            if (!selectedSymptoms.has(symptomId)) {
-                selectedSymptoms.add(symptomId);
-                renderSelectedSymptoms();
-                filterSymptoms();
-                searchInput.value = '';
-                dropdown.style.display = 'none';
-            }
+            searchInput.value = '';
+            dropdown.style.display = 'none';
         }
+    }
 
-        function filterSymptoms() {
-            const searchTerm = searchInput.value.toLowerCase();
-            const filtered = symptomList.filter(symptom => 
-                symptom.name.toLowerCase().includes(searchTerm) && 
-                !selectedSymptoms.has(symptom.id)
-            );
+    function filterSymptoms() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const filtered = symptomList.filter(symptom => 
+            symptom.name.toLowerCase().includes(searchTerm) && 
+            !selectedSymptoms.has(symptom.id)
+        );
+        
+        if (filtered.length === 0) {
+            dropdown.innerHTML = '<div class="no-results" style="padding:15px;text-align:center;color:#999;">No matching symptoms found</div>';
+        } else {
+            dropdown.innerHTML = filtered.map(symptom => 
+                `<div class="dropdown-item" data-symptom="${symptom.id}">${symptom.name}</div>`
+            ).join('');
             
-            if (filtered.length === 0) {
-                dropdown.innerHTML = '<div class="no-results" style="padding:15px;text-align:center;color:#999;">No matching symptoms found</div>';
-            } else {
-                dropdown.innerHTML = filtered.map(symptom => 
-                    `<div class="dropdown-item" data-symptom="${symptom.id}">${symptom.name}</div>`
-                ).join('');
-                
-                document.querySelectorAll('.dropdown-item').forEach(item => {
-                    item.addEventListener('click', () => {
-                        addSymptom(item.dataset.symptom);
-                    });
+            document.querySelectorAll('.dropdown-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    addSymptom(item.dataset.symptom);
                 });
-            }
+            });
         }
+    }
 
-        searchInput.addEventListener('focus', () => {
-            filterSymptoms();
-            dropdown.style.display = 'block';
-        });
+    searchInput.addEventListener('focus', function() {
+        if (!isLoggedIn) {
+            showLoginModal();
+            searchInput.blur();
+            return;
+        }
+        filterSymptoms();
+        dropdown.style.display = 'block';
+    });
 
-        searchInput.addEventListener('input', filterSymptoms);
+    searchInput.addEventListener('input', filterSymptoms);
 
-        document.addEventListener('click', (e) => {
-            if (!searchInput.contains(e.target) && !dropdown.contains(e.target)) {
-                dropdown.style.display = 'none';
+    document.addEventListener('click', function(e) {
+        if (!searchInput.contains(e.target) && !dropdown.contains(e.target)) {
+            dropdown.style.display = 'none';
+        }
+    });
+
+    renderSelectedSymptoms();
+
+    // ============================================
+    // NLP SYMPTOM DETECTION WITH LOGIN CHECK
+    // ============================================
+
+    const nlpInput = document.getElementById('nlpInput');
+    const nlpProcessBtn = document.getElementById('nlpProcessBtn');
+    const nlpWarning = document.getElementById('nlpWarning');
+    const nlpDetected = document.getElementById('nlpDetected');
+
+    if (nlpProcessBtn) {
+        nlpProcessBtn.addEventListener('click', async function() {
+            // Check login first
+            if (!isLoggedIn) {
+                showLoginModal();
+                return;
             }
-        });
-
-        renderSelectedSymptoms();
-
-        // ============================================
-        // NLP SYMPTOM DETECTION
-        // ============================================
-
-        const nlpInput = document.getElementById('nlpInput');
-        const nlpProcessBtn = document.getElementById('nlpProcessBtn');
-        const nlpWarning = document.getElementById('nlpWarning');
-        const nlpDetected = document.getElementById('nlpDetected');
-
-        nlpProcessBtn.addEventListener('click', async () => {
+            
             const text = nlpInput.value.trim();
             
             if (!text) {
@@ -779,9 +938,9 @@
                     if (data.has_unknown) {
                         let warningHtml = '<div><strong>⚠️ Unknown Symptoms Detected:</strong></div><ul>';
                         for (let i = 0; i < data.unknown_symptoms.length; i++) {
-                            warningHtml += `<li>${data.warnings[i]}</li>`;
+                            warningHtml += '<li>' + data.warnings[i] + '</li>';
                             if (data.suggestions[i]) {
-                                warningHtml += `<li class="text-muted" style="color:#666;">${data.suggestions[i]}</li>`;
+                                warningHtml += '<li style="color:#666;">' + data.suggestions[i] + '</li>';
                             }
                         }
                         warningHtml += '</ul>';
@@ -799,9 +958,9 @@
                         
                         const applyBtn = document.getElementById('applyNlpSymptoms');
                         if (applyBtn) {
-                            applyBtn.addEventListener('click', () => {
+                            applyBtn.addEventListener('click', function() {
                                 selectedSymptoms.clear();
-                                data.detected_symptoms.forEach(symptom => {
+                                data.detected_symptoms.forEach(function(symptom) {
                                     selectedSymptoms.add(symptom);
                                 });
                                 renderSelectedSymptoms();
@@ -811,11 +970,11 @@
                             });
                         }
                     } else if (!data.has_known && data.has_unknown) {
-                        nlpDetected.innerHTML = `<div style="color: #856404;">❌ No recognized symptoms found. Please use the dropdown to select symptoms.</div>`;
+                        nlpDetected.innerHTML = '<div style="color: #856404;">❌ No recognized symptoms found. Please use the dropdown to select symptoms.</div>';
                         nlpDetected.style.display = 'block';
                     }
                 } else {
-                    nlpWarning.innerHTML = `⚠️ Error: ${data.error}`;
+                    nlpWarning.innerHTML = '⚠️ Error: ' + data.error;
                     nlpWarning.style.display = 'block';
                     nlpWarning.className = 'nlp-warning warning';
                 }
@@ -828,81 +987,90 @@
                 nlpProcessBtn.disabled = false;
             }
         });
+    }
 
-        // ============================================
-        // CHART.JS INTEGRATION
-        // ============================================
+    // ============================================
+    // CHART.JS INTEGRATION
+    // ============================================
 
-        let probabilityChart = null;
+    let probabilityChart = null;
 
-        function createProbabilityChart(probabilities) {
-            const canvas = document.getElementById('probabilityChart');
-            if (!canvas) return;
-            
-            if (probabilityChart) {
-                probabilityChart.destroy();
-            }
-            
-            const diseases = probabilities.map(p => p.disease);
-            const values = probabilities.map(p => p.probability);
-            const colors = values.map(v => {
-                if (v >= 70) return '#28a745';
-                if (v >= 40) return '#ffc107';
-                return '#dc3545';
-            });
-            
-            probabilityChart = new Chart(canvas, {
-                type: 'bar',
-                data: {
-                    labels: diseases,
-                    datasets: [{
-                        label: 'Probability (%)',
-                        data: values,
-                        backgroundColor: colors,
-                        borderColor: colors,
-                        borderWidth: 1,
-                        borderRadius: 8,
-                        barPercentage: 0.65
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                            labels: { font: { size: 12 } }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return `${context.raw}% probability`;
-                                }
+    function createProbabilityChart(probabilities) {
+        const canvas = document.getElementById('probabilityChart');
+        if (!canvas) return;
+        
+        if (probabilityChart) {
+            probabilityChart.destroy();
+        }
+        
+        const diseases = probabilities.map(function(p) { return p.disease; });
+        const values = probabilities.map(function(p) { return p.probability; });
+        const colors = values.map(function(v) {
+            if (v >= 70) return '#28a745';
+            if (v >= 40) return '#ffc107';
+            return '#dc3545';
+        });
+        
+        probabilityChart = new Chart(canvas, {
+            type: 'bar',
+            data: {
+                labels: diseases,
+                datasets: [{
+                    label: 'Probability (%)',
+                    data: values,
+                    backgroundColor: colors,
+                    borderColor: colors,
+                    borderWidth: 1,
+                    borderRadius: 8,
+                    barPercentage: 0.65
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: { font: { size: 12 } }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.raw + '% probability';
                             }
                         }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        title: { display: true, text: 'Probability (%)', font: { size: 12 } },
+                        grid: { color: '#e0e0e0' }
                     },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 100,
-                            title: { display: true, text: 'Probability (%)', font: { size: 12 } },
-                            grid: { color: '#e0e0e0' }
-                        },
-                        x: {
-                            title: { display: true, text: 'Diseases', font: { size: 12 } },
-                            ticks: { rotation: 30, maxRotation: 30, font: { size: 11 } }
-                        }
+                    x: {
+                        title: { display: true, text: 'Diseases', font: { size: 12 } },
+                        ticks: { rotation: 30, maxRotation: 30, font: { size: 11 } }
                     }
                 }
-            });
-        }
+            }
+        });
+    }
 
-        // ============================================
-        // FORM SUBMISSION
-        // ============================================
+    // ============================================
+    // FORM SUBMISSION WITH LOGIN CHECK
+    // ============================================
 
-        document.getElementById('predictionForm').addEventListener('submit', async (e) => {
+    const predictionForm = document.getElementById('predictionForm');
+    if (predictionForm) {
+        predictionForm.addEventListener('submit', async function(e) {
             e.preventDefault();
+            
+            // Check if user is logged in
+            if (!isLoggedIn) {
+                showLoginModal();
+                return;
+            }
             
             const formData = {
                 Fever: parseInt(document.getElementById('selectedFever').value),
@@ -919,8 +1087,11 @@
                 Cholesterol_Level: parseInt(document.getElementById('Cholesterol_Level').value)
             };
             
-            document.getElementById('loading').classList.add('show');
-            document.getElementById('resultCard').classList.remove('show');
+            const loading = document.getElementById('loading');
+            const resultCard = document.getElementById('resultCard');
+            
+            loading.classList.add('show');
+            resultCard.classList.remove('show');
             
             try {
                 const response = await fetch('/predict', {
@@ -940,88 +1111,92 @@
                 console.error('Error:', error);
                 alert('An error occurred while analyzing');
             } finally {
-                document.getElementById('loading').classList.remove('show');
+                loading.classList.remove('show');
             }
         });
+    }
 
-        function displayResults(data) {
-            const resultContent = document.getElementById('resultContent');
+    function displayResults(data) {
+        const resultContent = document.getElementById('resultContent');
+        
+        let severityColor = '#28a745';
+        if (data.severity === 'Moderate') severityColor = '#ffc107';
+        if (data.severity === 'Severe') severityColor = '#dc3545';
+        
+        // Prepare top predictions for chart
+        const topPredictions = data.top_3_predictions || [
+            { disease: data.predicted_disease, probability: data.confidence },
+            { disease: 'Other', probability: (100 - data.confidence).toFixed(2) }
+        ];
+        
+        const chartHTML = `
+            <div class="chart-container">
+                <div class="chart-title">📊 Disease Probability Distribution</div>
+                <canvas id="probabilityChart" class="probability-chart" style="max-height: 250px;"></canvas>
+                <div class="disease-prediction-list">
+                    ${topPredictions.map(function(p) {
+                        return `<div class="prediction-item">
+                                    <span class="prediction-name">🩺 ${p.disease}</span>
+                                    <span class="prediction-prob">${p.probability}%</span>
+                                </div>`;
+                    }).join('')}
+                </div>
+            </div>
+        `;
+        
+        resultContent.innerHTML = `
+            <div class="prediction-box" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                <div style="font-size: 1.1em; opacity: 0.9;">🩺 Predicted Disease</div>
+                <div style="font-size: 2em; font-weight: bold; margin: 10px 0;">${data.predicted_disease || 'Unknown'}</div>
+                <div class="confidence">Confidence: ${data.confidence}%</div>
+            </div>
             
-            let severityColor = '#28a745';
-            if (data.severity === 'Moderate') severityColor = '#ffc107';
-            if (data.severity === 'Severe') severityColor = '#dc3545';
+            <div style="text-align: center;">
+                <div class="severity" style="background: ${severityColor}; color: white;">
+                    ${data.severity_icon || '🟢'} Severity: ${data.severity || 'Mild'}
+                </div>
+            </div>
             
-            // Prepare top predictions for chart
-            const topPredictions = data.top_3_predictions || [
-                { disease: data.predicted_disease, probability: data.confidence },
-                { disease: 'Other', probability: (100 - data.confidence).toFixed(2) }
-            ];
+            ${chartHTML}
             
-            const chartHTML = `
-                <div class="chart-container">
-                    <div class="chart-title">📊 Disease Probability Distribution</div>
-                    <canvas id="probabilityChart" class="probability-chart" style="max-height: 250px;"></canvas>
-                    <div class="disease-prediction-list">
-                        ${topPredictions.map(p => `
-                            <div class="prediction-item">
-                                <span class="prediction-name">🩺 ${p.disease}</span>
-                                <span class="prediction-prob">${p.probability}%</span>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
+            <div class="action-required">
+                <strong>🏥 Action Required:</strong><br>
+                ${data.action_required || 'Monitor symptoms and maintain healthy lifestyle'}
+            </div>
             
-            resultContent.innerHTML = `
-                <div class="prediction-box" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-                    <div style="font-size: 1.1em; opacity: 0.9;">🩺 Predicted Disease</div>
-                    <div style="font-size: 2em; font-weight: bold; margin: 10px 0;">${data.predicted_disease || 'Unknown'}</div>
-                    <div class="confidence">Confidence: ${data.confidence}%</div>
-                </div>
-                
-                <div style="text-align: center;">
-                    <div class="severity" style="background: ${severityColor}; color: white;">
-                        ${data.severity_icon || '🟢'} Severity: ${data.severity || 'Mild'}
-                    </div>
-                </div>
-                
-                ${chartHTML}
-                
-                <div class="action-required">
-                    <strong>🏥 Action Required:</strong><br>
-                    ${data.action_required || 'Monitor symptoms and maintain healthy lifestyle'}
-                </div>
-                
-                <div class="specialists">
-                    <h4>👨‍⚕️ Recommended Specialists:</h4>
-                    <ul>
-                        ${(data.specialists || ['General Physician']).map(s => `<li>${s}</li>`).join('')}
-                    </ul>
-                </div>
-                
-                <div class="risk-factors">
-                    <h4>📋 Patient Summary:</h4>
-                    <ul>
-                        <li><strong>Age:</strong> ${data.age || 0} years (${data.gender || 'Not specified'})</li>
-                        <li><strong>Symptoms reported:</strong> ${data.symptoms_count || 0}/8</li>
-                        <li><strong>Blood Pressure:</strong> ${data.bp_status || 'Normal'}</li>
-                        <li><strong>Cholesterol:</strong> ${data.cholesterol_status || 'Normal'}</li>
-                    </ul>
-                </div>
-                
-                <div class="disclaimer" style="margin-top: 15px; background: #f8f9fa; border-color: #ddd; color: #666;">
-                    <small>${data.disclaimer || '⚠️ This is an AI prediction. Please consult a real doctor.'}</small>
-                </div>
-            `;
+            <div class="specialists">
+                <h4>👨‍⚕️ Recommended Specialists:</h4>
+                <ul>
+                    ${(data.specialists || ['General Physician']).map(function(s) {
+                        return `<li>${s}</li>`;
+                    }).join('')}
+                </ul>
+            </div>
             
-            document.getElementById('resultCard').classList.add('show');
+            <div class="risk-factors">
+                <h4>📋 Patient Summary:</h4>
+                <ul>
+                    <li><strong>Age:</strong> ${data.age || 0} years (${data.gender || 'Not specified'})</li>
+                    <li><strong>Symptoms reported:</strong> ${data.symptoms_count || 0}/8</li>
+                    <li><strong>Blood Pressure:</strong> ${data.bp_status || 'Normal'}</li>
+                    <li><strong>Cholesterol:</strong> ${data.cholesterol_status || 'Normal'}</li>
+                </ul>
+            </div>
             
-            // Create chart after results are displayed
-            setTimeout(() => {
-                createProbabilityChart(topPredictions);
-            }, 100);
-        }
-    </script>
+            <div class="disclaimer" style="margin-top: 15px; background: #f8f9fa; border-color: #ddd; color: #666;">
+                <small>${data.disclaimer || '⚠️ This is an AI prediction. Please consult a real doctor.'}</small>
+            </div>
+        `;
+        
+        const resultCard = document.getElementById('resultCard');
+        resultCard.classList.add('show');
+        
+        // Create chart after results are displayed
+        setTimeout(function() {
+            createProbabilityChart(topPredictions);
+        }, 100);
+    }
+</script>
     
     <!-- Chatbot Scripts -->
     <script src="{{ url_for('static', filename='js/chatbot.js') }}"></script>
